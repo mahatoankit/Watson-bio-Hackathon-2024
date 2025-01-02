@@ -161,12 +161,12 @@ class Handler:
                 "prognosis": "variable; early treatment improves outcomes"
             },
             "glioma": {
-                "age_group": "young adults",
+                "age_group": "young",
                 "cancerous": "Yes",
                 "origin": "arises from glial cells, slow-growing",
                 "prognosis": "favorable compared to high-grade gliomas but risk of progression to higher grade",
                 "symptoms": "seizures, persistent headaches, cognitive or memory changes, and focal neurological deficits depending on tumor location",
-                "treatment": "surgery, radiation, and sometimes chemotherapy"
+                "treatment": "surgery, radiation, and possibly chemotherapy"
             }
         }
         self.isBrain = IsABrain(self.model_path.get("isBrain"))
