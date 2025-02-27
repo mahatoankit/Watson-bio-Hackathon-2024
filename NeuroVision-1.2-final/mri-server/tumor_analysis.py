@@ -9,10 +9,12 @@ from tensorflow.keras.models import load_model
 class Base:
     def __init__(self, model, size=32):
         if not os.path.exists(model):
-            raise Exception(f"The model that was suppose to located on the path '{model}' does not exist.")
+            raise Exception(
+                f"The model that was suppose to located on the path '{model}' does not exist."
+            )
         self.model = load_model(model)
         self.size = size
-    
+
     def check_this(self, img):
         img = numpy.frombuffer(img, numpy.uint8)
         img = cv2.imdecode(img, cv2.IMREAD_COLOR)
@@ -46,7 +48,7 @@ class IsAMedulloBlastoma(Base):
         super().__init__(model, size)
 
 
-class IsAMeningioma(Base): 
+class IsAMeningioma(Base):
     def __init__(self, model, size=32):
         super().__init__(model, size)
 
@@ -69,7 +71,10 @@ class Common:
         if kmn:
             return kmn
         if throw:
-            abort(400, description="The server expected a proper json with request, Never Found!")
+            abort(
+                400,
+                description="The server expected a proper json with request, Never Found!",
+            )
 
     @staticmethod
     def getArgs(of, throw=True):
@@ -77,7 +82,10 @@ class Common:
         if arg:
             return arg
         if throw:
-            return abort(400, description="The server expected a proper arg with request, Never Found!")
+            return abort(
+                400,
+                description="The server expected a proper arg with request, Never Found!",
+            )
 
     @staticmethod
     def getFile(of, throw=True):
@@ -85,7 +93,10 @@ class Common:
         if file:
             return file
         if throw:
-            return abort(400, description="The server expected a proper attached file with request, Never Found!")
+            return abort(
+                400,
+                description="The server expected a proper attached file with request, Never Found!",
+            )
 
     @staticmethod
     def handelHardException(_executable: callable, val=False, ignore_val=False):
@@ -93,23 +104,24 @@ class Common:
             _executable = _executable()
             _tp = type(_executable)
             if _tp not in [str, dict, list, tuple]:
-                raise Warning("The executable function returned a un-recognized datatype.")
+                raise Warning(
+                    "The executable function returned a un-recognized datatype."
+                )
             if val:
                 return _executable, 200
             else:
                 if _executable and not ignore_val:
                     raise Warning(
-                        "Got returnable value from callable function. Pass ('val=True' or 'ignore_val=True') as arg to remove this warning.")
-                return '', 200
+                        "Got returnable value from callable function. Pass ('val=True' or 'ignore_val=True') as arg to remove this warning."
+                    )
+                return "", 200
 
         except Exception as e:
-            return jsonify({
-                "error": str(e)
-            }), 500
+            return jsonify({"error": str(e)}), 500
 
 
 class Handler:
-    def __init__(self, models: dict[str: str]):
+    def __init__(self, models: dict[str:str]):
         self.model_path = models
         self.tumor_meta_data = {
             "pilocytic_astrocytoma": {
@@ -118,7 +130,7 @@ class Handler:
                 "age_group": "children and young adults",
                 "origin": "arises from astrocytes, often in the cerebellum",
                 "treatment": "surgical removal, radiation therapy if needed",
-                "prognosis": "generally favorable with complete resection"
+                "prognosis": "generally favorable with complete resection",
             },
             "medulloblastoma": {
                 "symptoms": "persistent headaches, nausea (especially in the morning), balance and coordination issues, vision problems, and cognitive changes, particularly in children",
@@ -126,7 +138,7 @@ class Handler:
                 "age_group": "children",
                 "origin": "develops in the cerebellum, often spreads through cerebrospinal fluid",
                 "treatment": "surgery, radiation, chemotherapy",
-                "prognosis": "variable; better for localized tumors"
+                "prognosis": "variable; better for localized tumors",
             },
             "glioblastoma": {
                 "symptoms": "persistent headaches, seizures, weakness or numbness (often on one side of the body), speech difficulties, memory loss, confusion, nausea, and difficulty walking or maintaining balance",
@@ -134,7 +146,7 @@ class Handler:
                 "age_group": "40-70 years",
                 "origin": "arises from astrocytes, highly aggressive",
                 "treatment": "surgery, radiation, chemotherapy (e.g., temozolomide)",
-                "prognosis": "poor, with median survival around 15 months"
+                "prognosis": "poor, with median survival around 15 months",
             },
             "meningioma": {
                 "symptoms": "headaches, seizures, vision or hearing loss, weakness in limbs, and cognitive or memory problems",
@@ -142,7 +154,7 @@ class Handler:
                 "age_group": "adults, more common in women",
                 "origin": "arises from meninges (membranes covering the brain and spinal cord)",
                 "treatment": "surgical removal, radiation for residual or recurrent tumors",
-                "prognosis": "excellent for benign tumors with complete resection"
+                "prognosis": "excellent for benign tumors with complete resection",
             },
             "metastasis": {
                 "symptoms": "headaches, seizures, nausea, vomiting, cognitive changes, weakness or numbness in limbs, vision problems, and speech difficulties",
@@ -150,7 +162,7 @@ class Handler:
                 "age_group": "varies; often seen in adults with systemic cancers",
                 "origin": "secondary tumors, spread from cancers elsewhere in the body",
                 "treatment": "targeted therapy, radiation, chemotherapy, surgery if feasible",
-                "prognosis": "depends on primary cancer type and extent of spread"
+                "prognosis": "depends on primary cancer type and extent of spread",
             },
             "encephalitis": {
                 "symptoms": "fever, headache, confusion, seizures, fatigue, and neurological deficits such as weakness or speech difficulties",
@@ -158,7 +170,7 @@ class Handler:
                 "age_group": "any age group",
                 "origin": "inflammation of the brain, often viral (e.g., herpes simplex virus)",
                 "treatment": "antiviral medications, corticosteroids, supportive care",
-                "prognosis": "variable; early treatment improves outcomes"
+                "prognosis": "variable; early treatment improves outcomes",
             },
             "glioma": {
                 "age_group": "young",
@@ -166,113 +178,143 @@ class Handler:
                 "origin": "arises from glial cells, slow-growing",
                 "prognosis": "favorable compared to high-grade gliomas but risk of progression to higher grade",
                 "symptoms": "seizures, persistent headaches, cognitive or memory changes, and focal neurological deficits depending on tumor location",
-                "treatment": "surgery, radiation, and possibly chemotherapy"
-            }
+                "treatment": "surgery, radiation, and possibly chemotherapy",
+            },
         }
         self.isBrain = IsABrain(self.model_path.get("isBrain"))
         self.isEncephalitis = IsAEncephalitis(self.model_path.get("isEncephalitis"))
         self.isGlioblastoma = IsAGlioblastoma(self.model_path.get("isGlioblastoma"))
         self.isGlioma = IsAGlioma(self.model_path.get("isGlioma"))
-        self.isMedulloblastoma = IsAMedulloBlastoma(self.model_path.get("isMedulloblastoma"))
+        self.isMedulloblastoma = IsAMedulloBlastoma(
+            self.model_path.get("isMedulloblastoma")
+        )
         self.isMeningioma = IsAMeningioma(self.model_path.get("isMeningioma"))
         self.isMetastasis = IsAMetastasis(self.model_path.get("isMetastasis"))
-        self.isPilocyticAstrocytoma = IsAPilocyticAstrocytoma(self.model_path.get("isPilocyticAstrocytoma"))
+        self.isPilocyticAstrocytoma = IsAPilocyticAstrocytoma(
+            self.model_path.get("isPilocyticAstrocytoma")
+        )
 
     def check_is_brain(self, img):
         img = img.read()
-        return {"isBrain": "YB" if self.isBrain.check_this(img) > .5 else "NB"}
-    
+        return {"isBrain": "YB" if self.isBrain.check_this(img) > 0.5 else "NB"}
+
     def check_is_Encephalitis(self, img):
         img = img.read()
-        return {"isEncephalitis": "YE" if self.isEncephalitis.check_this(img) > .5 else "NE"}
-    
+        return {
+            "isEncephalitis": (
+                "YE" if self.isEncephalitis.check_this(img) > 0.5 else "NE"
+            )
+        }
+
     def check_is_Glioblastoma(self, img):
         img = img.read()
-        return {"isGlioblastoma": "YGB" if self.isGlioblastoma.check_this(img) > .5 else "NGB"}
-    
+        return {
+            "isGlioblastoma": (
+                "YGB" if self.isGlioblastoma.check_this(img) > 0.5 else "NGB"
+            )
+        }
+
     def check_is_Glioma(self, img):
         img = img.read()
-        return {"isGlioma": "YGL" if self.isGlioma.check_this(img) > .5 else "NGL"}
-   
+        return {"isGlioma": "YGL" if self.isGlioma.check_this(img) > 0.5 else "NGL"}
+
     def check_is_Medulloblastoma(self, img):
         img = img.read()
-        return {"isMedulloblastoma": "YMD" if self.isMedulloblastoma .check_this(img) > .5 else "NMD"}
-    
+        return {
+            "isMedulloblastoma": (
+                "YMD" if self.isMedulloblastoma.check_this(img) > 0.5 else "NMD"
+            )
+        }
+
     def check_is_Meningioma(self, img):
         img = img.read()
-        return {"isMeningioma": "YMN" if self.isMeningioma .check_this(img) > .5 else "NMN"}
-   
+        return {
+            "isMeningioma": "YMN" if self.isMeningioma.check_this(img) > 0.5 else "NMN"
+        }
+
     def check_is_Metastasis(self, img):
         img = img.read()
-        return {"isMetastasis": "YMT" if self.isMetastasis.check_this(img) > .5 else "NMT"}
-       
+        return {
+            "isMetastasis": "YMT" if self.isMetastasis.check_this(img) > 0.5 else "NMT"
+        }
+
     def check_is_Pilocytic_Astrocytoma(self, img):
         img = img.read()
-        return {"isPilocyticAstrocytoma": "YP" if self.isPilocyticAstrocytoma.check_this(img) > .5 else "NP"}
+        return {
+            "isPilocyticAstrocytoma": (
+                "YP" if self.isPilocyticAstrocytoma.check_this(img) > 0.5 else "NP"
+            )
+        }
 
-    def check_type_of_tumor(self, img, args:dict):
+    def check_type_of_tumor(self, img, args: dict):
         img = img.read()
         matrix = {}
         _hig = (0, "")
-        
 
         if args.get("encephalitis"):
             _rq = self.isEncephalitis.check_this(img)
             if _rq > _hig[0]:
                 _hig = (_rq, "encephalitis")
             matrix["encephalitis"] = str(_rq)
-        
+
         if args.get("glioblastoma"):
             _rq = self.isGlioblastoma.check_this(img)
             if _rq > _hig[0]:
                 _hig = (_rq, "glioblastoma")
             matrix["glioblastoma"] = str(_rq)
-        
+
         if args.get("glioma"):
             _rq = self.isGlioma.check_this(img)
             if _rq > _hig[0]:
                 _hig = (_rq, "glioma")
             matrix["glioma"] = str(_rq)
-        
+
         if args.get("medulloblastoma"):
             _rq = self.isMedulloblastoma.check_this(img)
             if _rq > _hig[0]:
                 _hig = (_rq, "medulloblastoma")
             matrix["medulloblastoma"] = str(_rq)
-        
+
         if args.get("meningioma"):
             _rq = self.isMeningioma.check_this(img)
             if _rq > _hig[0]:
                 _hig = (_rq, "meningioma")
             matrix["meningioma"] = str(_rq)
-        
+
         if args.get("metastasis"):
             _rq = self.isMetastasis.check_this(img)
             if _rq > _hig[0]:
                 _hig = (_rq, "metastasis")
             matrix["metastasis"] = str(_rq)
-        
+
         if args.get("pilocytic_astrocytoma"):
             _rq = self.isPilocyticAstrocytoma.check_this(img)
             if _rq > _hig[0]:
                 _hig = (_rq, "pilocytic_astrocytoma")
             matrix["pilocytic_astrocytoma"] = str(_rq)
 
-        _type = (_hig[0] > .4 and _hig[1]) or "N/A"
+        _type = (_hig[0] > 0.4 and _hig[1]) or "N/A"
 
-        return {"matrix": matrix, "type": _type, "meta_data": self.tumor_meta_data.get(_type, {}), "confidence": str(_hig[0] * 100)[:5] + "%"}
+        return {
+            "matrix": matrix,
+            "type": _type,
+            "meta_data": self.tumor_meta_data.get(_type, {}),
+            "confidence": str(_hig[0] * 100)[:5] + "%",
+        }
 
 
-_handler = Handler({
-    "isBrain": "mri-server/ml-models/brain_mri_model.keras",
-    "isEncephalitis": "mri-server/ml-models/encephalitis.keras",
-    "isGlioblastoma": "mri-server/ml-models/glioblastoma.keras",
-    "isGlioma": "mri-server/ml-models/glioma.keras",
-    "isMedulloblastoma": "mri-server/ml-models/medulloblastoma.keras",
-    "isMeningioma": "mri-server/ml-models/meningioma.keras",
-    "isMetastasis": "mri-server/ml-models/metastasis.keras",
-    "isPilocyticAstrocytoma": "mri-server/ml-models/pilocytic_astrocytoma.keras",
-})
+_handler = Handler(
+    {
+        "isBrain": "mri-server/ml-models/brain_mri_model.keras",
+        "isEncephalitis": "mri-server/ml-models/encephalitis.keras",
+        "isGlioblastoma": "mri-server/ml-models/glioblastoma.keras",
+        "isGlioma": "mri-server/ml-models/glioma.keras",
+        "isMedulloblastoma": "mri-server/ml-models/medulloblastoma.keras",
+        "isMeningioma": "mri-server/ml-models/meningioma.keras",
+        "isMetastasis": "mri-server/ml-models/metastasis.keras",
+        "isPilocyticAstrocytoma": "mri-server/ml-models/pilocytic_astrocytoma.keras",
+    }
+)
 
 _common = Common()
 
@@ -283,34 +325,43 @@ app = Flask(__name__)
 
 @app.errorhandler(400)
 def _400(e):
-    return render_template('400.html', error_message=e.description), 400
+    return render_template("400.html", error_message=e.description), 400
 
 
 # is brain slug
 @app.route("/v1/neurovision/detect_brain", methods=["POST"])
 def isBrain():
-    return _common.handelHardException(lambda: _handler.check_is_brain(_common.getFile("file")), val=True)
+    return _common.handelHardException(
+        lambda: _handler.check_is_brain(_common.getFile("file")), val=True
+    )
 
 
 @app.route("/v1/neurovision/check_mri", methods=["POST"])
 def checkThisMRI():
-    return _common.handelHardException(lambda: _handler.check_type_of_tumor(_common.getFile("file"), {
-        "encephalitis": request.args.get("encephalitis", "1") == "1",
-        "glioblastoma": request.args.get("glioblastoma", "1") == "1",
-        "glioma": request.args.get("glioma", "1") == "1",
-        "medulloblastoma": request.args.get("medulloblastoma", "1") == "1",
-        "meningioma": request.args.get("meningioma", "1") == "1",
-        "metastasis": request.args.get("metastasis", "1") == "1",
-        "pilocytic_astrocytoma": request.args.get("pilocytic_astrocytoma", "1") == "1",
-    }), val=True)
+    return _common.handelHardException(
+        lambda: _handler.check_type_of_tumor(
+            _common.getFile("file"),
+            {
+                "encephalitis": request.args.get("encephalitis", "1") == "1",
+                "glioblastoma": request.args.get("glioblastoma", "1") == "1",
+                "glioma": request.args.get("glioma", "1") == "1",
+                "medulloblastoma": request.args.get("medulloblastoma", "1") == "1",
+                "meningioma": request.args.get("meningioma", "1") == "1",
+                "metastasis": request.args.get("metastasis", "1") == "1",
+                "pilocytic_astrocytoma": request.args.get("pilocytic_astrocytoma", "1")
+                == "1",
+            },
+        ),
+        val=True,
+    )
 
 
 @app.after_request
 def add_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Origin, Accept'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Origin, Accept"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST"
     return response
 
 
-app.run(port=4000, debug=True)
+app.run(port=4000)

@@ -8,8 +8,8 @@ export default function Application() {
                 <div className="p-6">
                     <h3 className="text-2xl font-semibold text-[#f99601] mb-3">Early Diagnosis</h3>
                     <p className="text-gray-300">
-                        Early detection of brain tumors is critical for successful treatment.
-                        NeuroVision provides rapid and accurate diagnosis, enabling doctors to act promptly.
+                        Early detection of brain tumors is critical for improving prognosis.
+                        NeuroVision provides rapid and accurate diagnosis, enabling doctors to act promptly without wasting time.
                     </p>
                 </div>
             </div>
